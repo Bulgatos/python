@@ -34,9 +34,9 @@ class coding(QDialog):
 
     def browse(self):
         filePath = QFileDialog.getOpenFileName(self, 'a file','*.jpg')
-        fileHandle = open(filePath, 'rb')
-        pixmap = QPixmap(filePath)
-        self.label2.setPixmap(pixmap)
+        fileHandle = open(filePath[0], 'rb')
+        pixmap = QPixmap(filePath[0])
+        self.label1.setPixmap(pixmap)
         print("Work!")
 
 
