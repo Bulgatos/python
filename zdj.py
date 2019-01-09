@@ -37,7 +37,7 @@ class coding(QDialog):
         fileHandle = open(filePath, 'rb')
         pixmap = QPixmap(filePath)
         self.label2.setPixmap(pixmap)
-        print("Whoa awesome")
+        print("Work!")
 
 
 
