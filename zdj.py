@@ -5,6 +5,8 @@ from PyQt5.QtWidgets import QDialog, QApplication, QMainWindow, QLabel, QDesktop
 from PyQt5.QtGui import QIcon, QFont, QPixmap
  
 class coding(QDialog):
+    self.filePath = None
+ 
     def __init__(self):
         super().__init__()
         self.title = 'Projekt'
@@ -33,9 +35,9 @@ class coding(QDialog):
         self.show()
 
     def browse(self):
-        filePath = QFileDialog.getOpenFileName(self, 'a file','*.jpg')
-        fileHandle = open(filePath[0], 'rb')
-        pixmap = QPixmap(filePath[0])
+        self.filePath = QFileDialog.getOpenFileName(self, 'a file','*.jpg')
+        fileHandle = open(self.filePath[0], 'rb')
+        pixmap = QPixmap(self.filePath[0])
         self.label1.setPixmap(pixmap)
         print("Work!")
 
