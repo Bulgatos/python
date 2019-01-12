@@ -1,0 +1,138 @@
+import sys
+import os
+from PIL import Image
+import numpy as np
+import matplotlib.pyplot as plt
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QDialog, QApplication, QMainWindow, QLabel, QDesktopWidget, QPushButton, QAction, QTextEdit, QMessageBox, QFileDialog,QFrame
+from PyQt5.QtGui import QFont, QPixmap
+ 
+class coding(QDialog):
+ 
+    def __init__(self):
+        super().__init__()
+        self.title = 'Projekt'
+        self.left = 300
+        self.top = 300
+        self.width = 300
+        self.height = 300
+        self.initUI()
+
+    def initUI(self):
+        self.setGeometry(100, 100, 350, 350)
+        self.setWindowTitle('Okienko')
+
+        boldFont = QFont()
+        boldFont.setBold(True)
+
+        labelpr = QLabel(self)
+        labelpr.setGeometry(10, 10, 100, 50)
+        labelpr.setFont(boldFont)
+        labelpr.setText("Przed")
+
+        labelpo = QLabel(self)
+        labelpo.setGeometry(180, 10, 100, 50)
+        labelpo.setFont(boldFont)
+        labelpo.setText("Po")
+
+        label1a = QLabel(self)
+        label1a.setGeometry(10, 40, 100, 50)
+        label1a.setText("Nazwa:")
+
+        self.label1b = QLabel(self)
+        self.label1b.setGeometry(60, 40, 300, 50)
+        
+        label2a = QLabel(self)
+        label2a.setGeometry(180, 40, 100, 50)
+        label2a.setText("Nazwa:")
+
+        self.label2b = QLabel(self)
+        self.label2b.setGeometry(230, 40, 300, 50)
+
+        label3a = QLabel(self)
+        label3a.setGeometry(10, 80, 100, 50)
+        label3a.setText("Rozmiar (bajty):")
+
+        self.label3b = QLabel(self)
+        self.label3b.setGeometry(100, 80, 300, 50)
+
+        label4a = QLabel(self)
+        label4a.setGeometry(180,80,100,50)
+        label4a.setText("Rozmiar (bajty):")
+
+        self.label4b = QLabel(self)
+        self.label4b.setGeometry(270,80,300,50)
+
+        btn = QPushButton('Browse', self)
+        btn.resize(btn.sizeHint())
+        btn.clicked.connect(self.browse)
+        btn.move(150, 250)       
+
+        btnF = QPushButton('Start', self)
+        btnF.resize(btn.sizeHint())
+        btnF.clicked.connect(self.fourier)
+        btnF.move(250, 250)       
+
+        self.show()
+
+    def browse(self):
+        self.filePath = QFileDialog.getOpenFileName(self, 'a file','*.bmp')
+        fileHandle = open(self.filePath[0], 'rb')
+        pixmap = QPixmap(self.filePath[0])
+        self.information()
+        print("Work!")
+    
+    def information(self):
+        self.label1b.setText(os.path.basename(self.filePath[0]))
+        self.label3b.setText(str(os.path.getsize(self.filePath[0])))
+        
+
+    def fourier(self):
+         # open an 8bpp indexed image
+        img = Image.open(self.filePath[0])
+        # load the image data into a numpy array
+        img_data = np.asarray(img)
+        # perform the 2-D fast Fourier transform on the image data
+        fourier = np.fft.fft2(img_data)
+        # move the zero-frequency component to the center of the Fourier spectrum
+        fourier = np.fft.fftshift(fourier)
+        # compute the magnitudes (absolute values) of the complex numbers
+        fourier = np.abs(fourier)
+        # compute the common logarithm of each value to reduce the dynamic range
+        fourier = np.log10(fourier)
+        # find the minimum value that is a finite number
+        lowest = np.nanmin(fourier[np.isfinite(fourier)])
+        # find the maximum value that is a finite number
+        highest = np.nanmax(fourier[np.isfinite(fourier)])
+        # calculate the original contrast range
+        original_range = highest - lowest
+        # normalize the Fourier image data ("stretch" the contrast)
+        norm_fourier = (fourier - lowest) / original_range * 255
+        # convert the normalized data into an image
+        norm_fourier_img = Image.fromarray(norm_fourier)
+
+        # display the original image and the Fourier image
+        fig = plt.figure()
+        ax1 = fig.add_subplot(121)
+        ax2 = fig.add_subplot(122)
+        ax1.imshow(img, cmap='gray')
+        ax2.imshow(norm_fourier_img)
+        ax1.title.set_text('Original Image')
+        ax2.title.set_text('Fourier Image')
+        plt.show()
+
+        # convert the output image to 8-bit pixels (grayscale) and save it
+        norm_fourier_img.convert('L').save('test.bmp')
+        
+        self.label2b.setText(os.path.basename('test.bmp'))
+        self.label4b.setText(str(os.path.getsize('test.bmp')))
+
+
+def main():
+    app = QApplication(sys.argv)
+    w = coding()
+    app.exec_()
+
+
+if __name__ == '__main__':
+    main()
